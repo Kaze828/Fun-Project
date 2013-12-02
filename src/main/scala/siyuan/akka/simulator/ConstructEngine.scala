@@ -65,7 +65,7 @@ class ConstructEngine extends Actor with ActorLogging {
       new String( byteArray.slice( indices(2)+1, indices(3) ) ).toDouble, // bid price
       new String( byteArray.slice( indices(3)+1, indices(4) ) ).toInt, // bid count
       new String( byteArray.slice( indices(4)+1, indices(5) ) ).toDouble, // ask price
-      new String( byteArray.slice( indices(5)+1, indices(6) ) ).toInt, // ask count
+      new String( byteArray.slice( indices(5)+1, byteArray.length) ).toInt, // ask count
       isLastLine
     )
     marketData
@@ -83,7 +83,6 @@ class ConstructEngine extends Actor with ActorLogging {
         }
         index = index + 1
       }
-      indices += index
       return indices.toArray
   }
 
