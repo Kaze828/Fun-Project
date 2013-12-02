@@ -41,21 +41,6 @@ class ConstructEngine extends Actor with ActorLogging {
   private def constructMarketData(byteArray: Array[Byte], isLastLine:Boolean): MarketData = {
 
 
-
-//    val values = (new String(byteArray)).split(',')
-//
-//
-//    val marketData = new MarketData(
-//      values(0).toDouble, // timestamp
-//      values(1), //  market name
-//      values(2), //  pair name
-//      values(3).toDouble, // bid price
-//      values(4).toInt, // bid count
-//      values(5).toDouble, // ask price
-//      values(6).toInt, // ask count
-//      isLastLine
-//    )
-
     val indices =  parseByteArray( byteArray )
 
     val marketData = new MarketData(

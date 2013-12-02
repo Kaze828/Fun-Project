@@ -39,7 +39,7 @@ class FileLoader extends Actor with ActorLogging {
 
         val temp = buffer.get
         if( temp == LINESEPARATOR ){
-          construct_engine ! Line( list.toArray.slice(0, list.length-1), false )
+          construct_engine ! Line( list.toArray, false )
           list.clear()
         }else{
           list += temp
