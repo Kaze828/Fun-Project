@@ -1,5 +1,26 @@
-A sample for the Typesafe Stack (http://typesafe.com/stack).
+For two algorithmic questions, Please refer to
+1)src/main/scala/siyuan/akka/fun/CountCharacters.scala
+2)src/main/scala/siyuan/akka/fun/Quote.scala
 
-Akka 2.1.2 sample project using Scala and SBT.
+For the small project, Please refer to
+src/main/scala/siyuan/akka/fun/simulator.scala
+and you can find configurations in src/main/resources/application.conf
+e.g. num_of_quotes_to_print, it's set to 3 by default.
 
-To run and test it use SBT invoke: 'sbt run'
+you can simple run "sbt 'run-main siyuan.akka.simulator.FXAggregator'" to execute the simulator program.
+
+The basic design idea of this solution is Asynchronous Processing: Make sure each step won't block the whole process.
+
+In order to achieve this goal, I divided the whole system into four actors:( FileLoader, ConstructEngine, ComputeEngine, LogPrinter )
+1) FileLoader: load file to native memory and parse the steam line by line. Once it gets a line, it will forward the line to ConstructEngine.
+
+2) ConstructEngine: This actor is mainly for constructing MarketData objects by parsing the line, which is a byte array. Once it gets a MarketData object, it will pass it to ComputeEngine.
+
+3) ComputeEngine: This actor is mainly for doing aggregation work. It will also notify LogPrinter to print log when time passed each 100 millsecs. And meanwhile, it can still doing its own computation.
+
+4) LogPrinter: This actor is used to print logs to a log file and will shutdown the whole system once it's notified all quotes have been processed.
+
+Highlight of the implementation:
+1) make use of native memory to buffer the file so that reduce the heap usage
+2) parsing lines from byte array directly so that avoiding creating temp String Objects.
+3) the Asynchronous Processing flow reduces the blocking behavior
