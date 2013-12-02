@@ -21,6 +21,6 @@ In order to achieve this goal, I divided the whole system into four actors:( Fil
 4) LogPrinter: This actor is used to print logs to a log file and will shutdown the whole system once it's notified all quotes have been processed.
 
 Highlight of the implementation:
-1) make use of native memory to buffer the file so that reduce the heap usage
-2) parsing lines from byte array directly so that avoiding creating temp String Objects.
+1) making use of native memory to buffer the file so that reduce the heap usage
+2) parsing lines from byte array directly to avoid creating temp String Objects.
 3) the Asynchronous Processing flow reduces the blocking behavior
