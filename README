@@ -12,11 +12,11 @@ you can simple run "sbt 'run-main siyuan.akka.simulator.FXAggregator'" to execut
 The basic design idea of this solution is Asynchronous Processing: Make sure each step won't block the whole process.
 
 In order to achieve this goal, I divided the whole system into four actors:( FileLoader, ConstructEngine, ComputeEngine, LogPrinter )
-1) FileLoader: load file to native memory and parse the steam line by line. Once it gets a line, it will forward the line to ConstructEngine.
+1) FileLoader: load file to native memory and parse the stream line by line. Once it gets a line, it will forward the line to ConstructEngine and continue parsing lines.
 
-2) ConstructEngine: This actor is mainly for constructing MarketData objects by parsing the line, which is a byte array. Once it gets a MarketData object, it will pass it to ComputeEngine.
+2) ConstructEngine: This actor is mainly for constructing MarketData objects by parsing a line, which is a byte array. Once it gets a MarketData object, it will pass it to ComputeEngine.
 
-3) ComputeEngine: This actor is mainly for doing aggregation work. It will also notify LogPrinter to print log when time passed each 100 millsecs. And meanwhile, it can still doing its own computation.
+3) ComputeEngine: This actor is mainly for doing aggregation work. It will also notify LogPrinter to print log when time passed each 100 millsecs. And meanwhile, it can still doing its own computation as long as there are objects sent by ConstructEngine.
 
 4) LogPrinter: This actor is used to print logs to a log file and will shutdown the whole system once it's notified all quotes have been processed.
 
