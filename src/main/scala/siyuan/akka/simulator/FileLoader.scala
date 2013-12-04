@@ -7,7 +7,7 @@ import com.typesafe.config.ConfigFactory
 import scala.collection.mutable.{ListBuffer}
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
-
+import scala.util.control._
 
 class FileLoader extends Actor with ActorLogging {
 
@@ -26,29 +26,34 @@ class FileLoader extends Actor with ActorLogging {
    */
   private final val LINESEPARATOR : Byte = '\n'.toByte
 
-  private def skipTheFirstLine(){
-    while( buffer.hasRemaining && buffer.get != LINESEPARATOR ){}
-  }
+
 
   def receive = {
     case "Start" =>
       loadData
      // send each line to
-      var list = new ListBuffer[Byte]()
-      while( buffer.hasRemaining ){
+      var start = 0;
+      var end = 0;
 
+      // skip the first line
+      while( buffer.hasRemaining && buffer.get != LINESEPARATOR ){
+       end = end + 1
+      }
+      end = end + 1;
+      start = end
+
+      //start sending data
+      while( buffer.hasRemaining ){
+        end = end + 1
         val temp = buffer.get
         if( temp == LINESEPARATOR ){
-          construct_engine ! Line( list.toArray, false )
-          list.clear()
-        }else{
-          list += temp
+          construct_engine ! Line( buffer.duplicate, start, end-start-1, false )
+          start = end 
         }
-
       }
 
       //send last line
-      construct_engine ! Line( list.toArray, true )
+      construct_engine ! Line( buffer, start, end-start, true )
     case _ =>
       log info ("other message")
 
@@ -69,7 +74,7 @@ class FileLoader extends Actor with ActorLogging {
     stream.close()
 
     //skip the first line, they are just column names.
-    skipTheFirstLine
+//    skipTheFirstLine
   }
 
   override def preStart() {

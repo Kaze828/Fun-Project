@@ -6,13 +6,16 @@ import akka.actor.ActorRef
 import akka.actor.Props
 import akka.actor.actorRef2Scala
 import scala.collection.mutable.ArrayBuffer
+import java.nio.ByteBuffer
 
 
 object ConstructEngine {
 
   case class Data(marketData: MarketData)
 
-  case class Line(array: Array[Byte], isLastLine: Boolean)
+//  case class Line(array: Array[Byte], isLastLine: Boolean)
+
+  case class Line( buffer: ByteBuffer, offset: Int, length: Int, isLastLine: Boolean)
 
 }
 
@@ -25,7 +28,10 @@ class ConstructEngine extends Actor with ActorLogging {
   val computeEngine = context.actorOf(Props[ComputeEngine], "ComputeEngine")
 
   def receive = {
-    case Line(array, isLastLine) =>
+    case Line(buffer, offset, length, isLastLine) =>
+      val array = new Array[Byte](length)
+      buffer.position(offset)
+      buffer.get(array)
       val data = constructMarketData(array, isLastLine)
       computeEngine ! Data(data)
     case _ => {}
