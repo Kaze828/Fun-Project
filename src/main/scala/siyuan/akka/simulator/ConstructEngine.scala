@@ -49,8 +49,7 @@ class ConstructEngine extends Actor with ActorLogging {
 
     val indices =  parseByteArray( byteArray )
 
-    val marketData = new MarketData(
-      new String( byteArray.slice(0, indices(0) ) ).toDouble, // timestamp
+    val marketData = new MarketData( new String( byteArray.slice(0, indices(0) ) ).toDouble, // timestamp
       new String( byteArray.slice( indices(0)+1, indices(1) ) ), //  market name
       new String( byteArray.slice( indices(1)+1, indices(2) ) ), //  pair name
       new String( byteArray.slice( indices(2)+1, indices(3) ) ).toDouble, // bid price
