@@ -7,12 +7,13 @@ import com.typesafe.config.ConfigFactory
 import java.io.PrintWriter
 import java.lang.System
 import java.text.SimpleDateFormat
+import scala.Predef._
 
 object LogPrinter{
-  case class LogMessage( bid_map: HashMap[String, TreeMap[Double, Int]],
-                         ask_map: HashMap[String, TreeMap[Double, Int]],
-                         time: Int,
-                         noMoreMessage: Boolean)
+  case class LogMessage( time: Int,
+                         noMoreMessage: Boolean,
+                         bid_quotes:  scala.collection.immutable.HashMap[String, Pair[Double, Int]],
+                         ask_quotes:  scala.collection.immutable.HashMap[String, Pair[Double, Int]])
 }
 
 /**
@@ -31,13 +32,34 @@ class LogPrinter extends Actor with ActorLogging {
   val sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss, S");
   var buffer = new StringBuilder
 
+  val CURRENCY_PAIRS = Array(
+    "EURUSD",
+    "GBPUSD",
+    "EURGBP",
+    "USDCHF",
+    "EURCHF",
+    "USDJPY",
+    "EURJPY",
+    "AUDUSD",
+    "NZDUSD",
+    "USDCAD"
+  )
 
+
+  var bid_map = new HashMap[String, TreeMap[Double, Int]]()
+  var ask_map = new HashMap[String, TreeMap[Double, Int]]()
+  for (pair <- CURRENCY_PAIRS) {
+    bid_map.put(pair, TreeMap.empty[Double, Int])
+    ask_map.put(pair, TreeMap.empty[Double, Int])
+  }
 
   var out = new PrintWriter( log_file_name )
 
   def receive = {
-    case LogMessage( bid_map, ask_map, time, noMoreMessage ) =>  {
+    case LogMessage( time, noMoreMessage, bid_quotes, ask_quotes ) =>  {
          if( ! noMoreMessage ){
+           aggregateResult(bid_map, bid_quotes)
+           aggregateResult(ask_map, ask_quotes)
            printQuote( bid_map, ask_map, time)
          }else{
            // close the stream
@@ -49,6 +71,43 @@ class LogPrinter extends Actor with ActorLogging {
     }
 
 
+
+  }
+
+  private def aggregateResult( map: HashMap[String, TreeMap[Double, Int]],
+                               quotes: scala.collection.immutable.HashMap[String, Pair[Double, Int]]) = {
+    for (pair <- CURRENCY_PAIRS) {
+      map.put(pair, TreeMap.empty[Double, Int])
+    }
+
+
+    val it = quotes.iterator
+
+    while( it.hasNext ){
+      val element = it.next()
+      val key = element._1 // key is "marketname" + currencypair
+      val currency_pair = key.substring(key.length-6, key.length )
+
+      val value_pair = element._2        // contains(rate, rate_size)
+      val rate = value_pair._1
+      val rate_size = value_pair._2
+
+      val rates = map.get(currency_pair )
+
+      val old_size = rates.get( rate )
+
+      old_size match {
+        case Some(size) => {
+          map.put(currency_pair, rates.updated(rate,  size + rate_size))
+
+        }
+        // only will be executed when a new bid appears for a currency  at the first time
+        case None => {
+          map.put(currency_pair, rates.updated(rate, rate_size))
+        }
+      }
+
+    }
 
   }
 
