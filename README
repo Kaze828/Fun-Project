@@ -24,3 +24,10 @@ Highlight of the implementation:
 1) making use of native memory to buffer the file so that reduce the heap usage
 2) parsing lines from byte array directly to avoid creating temp String Objects.
 3) the Asynchronous Processing flow reduces the blocking behavior
+
+
+update log:
+12/04/2013, Wed:
+1) refine messages passed between ConstructEngine and ComputeEngine so that avoiding creating temp byte array. (this change is in master)
+2) removed unnecessary computation logic in ComputeEngine and let LogPrinter to aggregate results.  The overall logic is simplified and
+code become more clean. (this change is in "wed_improvement" branch)
