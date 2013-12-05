@@ -29,5 +29,5 @@ Highlight of the implementation:
 update log:
 12/04/2013, Wed:
 1) refine messages passed between ConstructEngine and ComputeEngine so that avoiding creating temp byte array. (this change is in master)
-2) removed unnecessary computation logic in ComputeEngine and let LogPrinter to aggregate results.  The overall logic is simplified and
+2) removed unnecessary computation logic in ComputeEngine and let LogPrinter aggregate results.  The overall logic is simplified and
 code become more clean. (this change is in "wed_improvement" branch)
